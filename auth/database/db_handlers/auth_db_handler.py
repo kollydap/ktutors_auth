@@ -57,7 +57,7 @@ async def get_user_by_email(email: str):
     query = UserDb.select().where(UserDb.c.email == email)
     result = await database.fetch_one(query)
     if not result:
-        return NotFound
+        raise NotFound
     return result
 
 
@@ -75,7 +75,6 @@ async def update_password(email: str, password: str):
         UserDb.update()
         .where(UserDb.c.email == email)
         .values(password=password)
-        .returning(UserDb)
     )
     result = await database.execute(query)
     if not result:

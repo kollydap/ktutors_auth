@@ -192,6 +192,7 @@ async def refresh(**kwargs):
 
 async def forgot_password(email: str, **kwargs):
     try:
+        
         await auth_db_handlers.get_user_by_email(email=email, **kwargs)
     except NotFound as e:
         LOGGER.exception(e)
@@ -202,6 +203,11 @@ async def forgot_password(email: str, **kwargs):
         token_type=TokenType.FORGOT_PASSWORD,
         routing_action="forgot_password",
     )
+    return TokenProfile(
+        message=f"email with token sent to {email}",
+        validity=service_utils.ACCESS_TOKEN_VALIDITY_SECONDS,
+    )
+
 
 
 async def change_password(password_change: PasswordChange, **kwargs):
