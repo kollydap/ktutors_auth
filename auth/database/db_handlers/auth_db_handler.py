@@ -55,11 +55,25 @@ async def get_token(email: str):
 
 async def get_user_by_email(email: str):
     query = UserDb.select().where(UserDb.c.email == email)
+    result = await database.fetch_one(query)
+    if not result:
+        return NotFound
+        
+    return result
+    # try:
+    #     return await database.fetch_one(query)
+    # except Exception as e:
+    #     print(f"Error fetching user by email: {e}")
+    #     return None
+    
+async def get_user_by_password(password:str):
+    query  = UserDb.select().where(UserDb.c.password == password)
     try:
         return await database.fetch_one(query)
     except Exception as e:
-        print(f"Error fetching user by email: {e}")
+        print(f"Error fetching user by password: {e}")
         return None
+        
 
 
 async def get_user_password_by_email(email: str, **kwargs):

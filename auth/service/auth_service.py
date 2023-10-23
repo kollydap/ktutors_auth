@@ -2,6 +2,7 @@ from auth.models.auth_models import (
     UserSignUp,
     TokenProfile,
     UserProfile,
+    PasswordChange,
     UserAccessStore,
     UserRefreshStore,
     Login,
@@ -183,9 +184,24 @@ async def refresh(**kwargs):
     ...
 
 
-async def forgot_password(**kwargs):
-    ...
+async def forgot_password(email:str,**kwargs):
+    await auth_db_handlers.get_user_by_email(email=email)
+    await _save_token_and_send_email(
+        email=email,
+        token_type=TokenType.FORGOT_PASSWORD,
+        routing_action="forgot_password",
+    )
 
+async def change_password(password_change: PasswordChange, **kwargs):
+    await _save_token_and_send_email(
+        email=user_signup.email,
+        token_type=TokenType.USER_SIGN_UP,
+        routing_action="user_signup",
+    )
 
-async def change_password(**kwargs):
-    ...
+    old_password = password_change.old_password
+    # convert to hashed password
+    service_utils.encrypt_password(password=old_password)
+
+    # todo: get account by old password
+    # todo if found generate a token with change password tag

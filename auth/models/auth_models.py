@@ -79,18 +79,6 @@ class TokenType(str, Enum):
 
 
 
-# class TokenStore(BaseModel):
-#     email: str
-#     token: str
-#     token_type: TokenType
-#     # user_uid: Optional[UUID]
-#     user_uid: Optional[int]
-
-#     class Config:
-#         extra = "ignore"
-
-
-
 # *------------redis-------------------------
 
 class TokenStore(HashModel):
