@@ -11,7 +11,7 @@ from app.core.config import settings
 from fastapi import HTTPException, Security, status
 from sqlalchemy.orm import Session
 from auth.database.db_models.auth_orm import database
-from auth.service.service_exceptions import NotFound
+from auth.service.service_exceptions import NotFound, UpdateError
 
 LOGGER = logging.getLogger(__file__)
 
@@ -58,22 +58,29 @@ async def get_user_by_email(email: str):
     result = await database.fetch_one(query)
     if not result:
         return NotFound
-        
     return result
-    # try:
-    #     return await database.fetch_one(query)
-    # except Exception as e:
-    #     print(f"Error fetching user by email: {e}")
-    #     return None
-    
-async def get_user_by_password(password:str):
-    query  = UserDb.select().where(UserDb.c.password == password)
+
+
+async def get_user_by_password(password: str):
+    query = UserDb.select().where(UserDb.c.password == password)
     try:
         return await database.fetch_one(query)
     except Exception as e:
         print(f"Error fetching user by password: {e}")
         return None
-        
+
+
+async def update_password(email: str, password: str):
+    query = (
+        UserDb.update()
+        .where(UserDb.c.email == email)
+        .values(password=password)
+        .returning(UserDb)
+    )
+    result = await database.execute(query)
+    if not result:
+        raise UpdateError
+    return result
 
 
 async def get_user_password_by_email(email: str, **kwargs):
@@ -83,4 +90,3 @@ async def get_user_password_by_email(email: str, **kwargs):
         raise NotFound
     # return _UserPassword(**result.as_dict())
     return result
-

@@ -148,6 +148,12 @@ async def token_verification(token_verification: TokenVerification, **kwargs):
         user_profile = await auth_db_handlers.get_user_by_email(
             email=token_verification.email, **kwargs
         )
+        encrypted_password = service_utils.encrypt_password(
+            password=token_verification.password
+        )
+        await auth_db_handlers.update_password(
+            password=encrypted_password, email=token_store.email
+        )
 
     elif token_store.token_type == TokenType.EMAIL_CHANGE:
         try:
@@ -184,13 +190,19 @@ async def refresh(**kwargs):
     ...
 
 
-async def forgot_password(email:str,**kwargs):
-    await auth_db_handlers.get_user_by_email(email=email)
+async def forgot_password(email: str, **kwargs):
+    try:
+        await auth_db_handlers.get_user_by_email(email=email, **kwargs)
+    except NotFound as e:
+        LOGGER.exception(e)
+        raise KApiError(AuthErrorEnum.AUTH_007)
+
     await _save_token_and_send_email(
         email=email,
         token_type=TokenType.FORGOT_PASSWORD,
         routing_action="forgot_password",
     )
+
 
 async def change_password(password_change: PasswordChange, **kwargs):
     await _save_token_and_send_email(

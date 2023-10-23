@@ -2,8 +2,9 @@ from pydantic import BaseModel, EmailStr, constr
 from enum import Enum
 from uuid import UUID
 from typing import Optional
-from redis_om import JsonModel, Field,HashModel,get_redis_connection,Migrator
+from redis_om import JsonModel, Field, HashModel, get_redis_connection, Migrator
 from abc import ABC
+
 
 class Password(BaseModel):
     password: constr(
@@ -60,6 +61,7 @@ class UserProfile(BaseModel):
     is_verified: bool
     # permissions: dict
 
+
 class UserStore(HashModel):
     first_name: str
     last_name: str
@@ -77,9 +79,8 @@ class TokenType(str, Enum):
     EMAIL_CHANGE = "EMAIL_CHANGE"
 
 
-
-
 # *------------redis-------------------------
+
 
 class TokenStore(HashModel):
     # todo change email to EmailStr
@@ -87,13 +88,13 @@ class TokenStore(HashModel):
     token: str
     token_type: TokenType
 
-
     class Config:
         extra = "ignore"
 
+
 class UserAccessStore(HashModel):
     # todo : change user_uid to UUID
-    user_uid: int= Field(index=True, primary_key=True)
+    user_uid: int = Field(index=True, primary_key=True)
     # permissions: dict
     access_token: str
 
@@ -109,4 +110,4 @@ class UserRefreshStore(HashModel):
     refresh_token: str = Field(index=True)
 
     class Config:
-        extra ="ignore"
+        extra = "ignore"
