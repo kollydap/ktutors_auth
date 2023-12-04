@@ -94,7 +94,7 @@ class TokenStore(HashModel):
 
 class UserAccessStore(HashModel):
     # todo : change user_uid to UUID
-    user_uid: int = Field(index=True, primary_key=True)
+    user_uid: str= Field(index=True, primary_key=True)
     # permissions: dict
     access_token: str
 
@@ -106,7 +106,7 @@ class UserAccessStore(HashModel):
 
 class UserRefreshStore(HashModel):
     # todo change to uuid
-    user_uid: int = Field(index=True, primary_key=True)
+    user_uid: str = Field(index=True, primary_key=True)
     refresh_token: str = Field(index=True)
 
     class Config:

@@ -16,22 +16,15 @@ metadata = sqlalchemy.MetaData()
 User = sqlalchemy.Table(
     "user",
     metadata,
-    Column("user_uid", Integer, primary_key=True),
+    Column(
+        "user_uid", String, primary_key=True, unique=True, nullable=False, index=True
+    ),
     Column("email", String, unique=True, index=True),
     Column("password", String),
     Column("permission", JSON, nullable=True, default={}),
     Column("is_verified", Boolean, default=False),
 )
 
-TokenStore = sqlalchemy.Table(
-    "token_store",
-    metadata,
-    Column("token_uid", Integer, primary_key=True),
-    Column("email", String),
-    Column("token", String),
-    Column("token_type", Enum(TokenType)),
-    Column("user_uid", Integer, nullable=True),
-)
 
 engine = sqlalchemy.create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}

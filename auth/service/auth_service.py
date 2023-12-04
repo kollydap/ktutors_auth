@@ -143,6 +143,7 @@ async def token_verification(token_verification: TokenVerification, **kwargs):
         user_store["auth_user_uid"] = user_profile.user_uid
         user_data = json.dumps(user_store)
         _send_user_data_to_pms(user_data)
+        _create_user_wallet(user_profile.user_uid)
 
     elif token_store.token_type == TokenType.FORGOT_PASSWORD:
         user_profile = await auth_db_handlers.get_user_by_email(
@@ -182,6 +183,15 @@ def _send_user_data_to_pms(user_data):
     connection.close()
 
 
+def _create_user_wallet(user_uid):
+    connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    channel = connection.channel()
+    channel.queue_declare(queue="auth_to_pms")
+    channel.basic_publish(exchange="", routing_key="auth_to_mms", body=str(user_uid))
+    print(" [x] Sent  data to mms")
+    connection.close()
+
+
 async def logout(**kwargs):
     ...
 
@@ -192,7 +202,6 @@ async def refresh(**kwargs):
 
 async def forgot_password(email: str, **kwargs):
     try:
-        
         await auth_db_handlers.get_user_by_email(email=email, **kwargs)
     except NotFound as e:
         LOGGER.exception(e)
@@ -207,7 +216,6 @@ async def forgot_password(email: str, **kwargs):
         message=f"email with token sent to {email}",
         validity=service_utils.ACCESS_TOKEN_VALIDITY_SECONDS,
     )
-
 
 
 async def change_password(password_change: PasswordChange, **kwargs):
